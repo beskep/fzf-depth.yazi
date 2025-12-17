@@ -20,7 +20,9 @@ local function fd(cwd, depth)
     local output, err =
         Command('fd'):arg({ '-d', depth, '--no-ignore' }):cwd(tostring(cwd)):stdout(Command.PIPED):output()
 
-    if not output or not output.status.success then return cwd, Err('Failed to start `fd`, error: %s', err) end
+    if not output or not output.status.success then
+        return cwd, Err('Failed to start `fd`, error: %s', err)
+    end
 
     for line in output.stdout:gmatch('[^\r\n]+') do
         selected[#selected + 1] = Url(line)
@@ -50,11 +52,17 @@ function M:entry(job)
         selected = get_selected()
     end
 
-    if ya.hide then ya.hide() end
-    if ui.hide then ui.hide() end
+    if ya.hide then
+        ya.hide()
+    end
+    if ui.hide then
+        ui.hide()
+    end
 
     local output, err = M.run_with(cwd, selected)
-    if not output then return ya.notify({ title = 'Fzf', content = tostring(err), timeout = 5, level = 'error' }) end
+    if not output then
+        return ya.notify({ title = 'Fzf', content = tostring(err), timeout = 5, level = 'error' })
+    end
 
     local urls = M.split_urls(cwd, output)
     if #urls == 1 then
@@ -74,12 +82,16 @@ function M.run_with(cwd, selected)
         :stdout(Command.PIPED)
         :spawn()
 
-    if not child then return nil, Err('Failed to start `fzf`, error: %s', err) end
+    if not child then
+        return nil, Err('Failed to start `fzf`, error: %s', err)
+    end
 
     for _, u in ipairs(selected) do
         child:write_all(string.format('%s\n', u))
     end
-    if #selected > 0 then child:flush() end
+    if #selected > 0 then
+        child:flush()
+    end
 
     local output, err = child:wait_with_output()
     if not output then
