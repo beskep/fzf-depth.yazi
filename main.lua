@@ -1,15 +1,11 @@
 local M = {}
 
-local get_cwd = ya.sync(function()
-    return cx.active.current.cwd
-end)
-
-local get_selected = ya.sync(function()
+local state = ya.sync(function()
     local selected = {}
     for _, url in pairs(cx.active.selected) do
         selected[#selected + 1] = url
     end
-    return selected
+    return cx.active.current.cwd, selected
 end)
 
 --- @param cwd Url
@@ -35,7 +31,7 @@ end
 function M:entry(job)
     ya.emit('escape', { visual = true })
 
-    local cwd = get_cwd()
+    local cwd, selected = state()
     if cwd.scheme and cwd.scheme.is_virtual then
         return ya.notify({
             title = 'Fzf',
@@ -45,11 +41,8 @@ function M:entry(job)
         })
     end
 
-    local selected
-    if job.args.depth and job.args.depth ~= '0' then
+    if #selected == 0 and job.args.depth and job.args.depth ~= '0' then
         selected = fd(cwd, job.args.depth)
-    else
-        selected = get_selected()
     end
 
     if ya.hide then
