@@ -45,12 +45,7 @@ function M:entry(job)
         selected = fd(cwd, job.args.depth)
     end
 
-    if ya.hide then
-        ya.hide()
-    end
-    if ui.hide then
-        ui.hide()
-    end
+    local permit = ui.hide and ui.hide() or ya.hide()
 
     local output, err = M.run_with(cwd, selected)
     if not output then
